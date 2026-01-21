@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Aseem Games</title>
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#111;
+    color:white;
+    text-align:center;
+}
+button{
+    padding:10px 20px;
+    margin:5px;
+    font-size:18px;
+    cursor:pointer;
+}
+canvas{
+    background:#000;
+    display:none;
+    margin:auto;
+    border:2px solid #0f0;
+}
+#clickGame{
+    display:none;
+}
+.circle{
+    width:60px;
+    height:60px;
+    background:red;
+    border-radius:50%;
+    position:absolute;
+}
+</style>
+</head>
+<body>
+
+<h1>🎮 Aseem Games</h1>
+
+<div id="menu">
+    <button onclick="startSnake()">Snake 🐍</button>
+    <button onclick="startClick()">Speed Click ⚡</button>
+</div>
+
+<canvas id="snake" width="400" height="400"></canvas>
+
+<div id="clickGame">
+    <h2 id="score">Score: 0</h2>
+</div>
+
+<script>
+// ===== Snake Game =====
+const canvas = document.getElementById("snake");
+const ctx = canvas.getContext("2d");
+let box = 20;
+let snake, food, dir, game;
+
+function startSnake(){
+    hideAll();
+    canvas.style.display="block";
+    snake=[{x:200,y:200}];
+    food=randomFood();
+    dir="RIGHT";
+    document.addEventListener("keydown",control);
+    clearInterval(game);
+    game=setInterval(draw,100);
+}
+
+function control(e){
+    if(e.key=="ArrowUp" && dir!="DOWN") dir="UP";
+    if(e.key=="ArrowDown" && dir!="UP") dir="DOWN";
+    if(e.key=="ArrowLeft" && dir!="RIGHT") dir="LEFT";
+    if(e.key=="ArrowRight" && dir!="LEFT") dir="RIGHT";
+}
+
+function draw(){
+    ctx.clearRect(0,0,400,400);
+    snake.forEach(s=>{
+        ctx.fillStyle="lime";
+        ctx.fillRect(s.x,s.y,box,box);
+    });
+
+    ctx.fillStyle="red";
+    ctx.fillRect(food.x,food.y,box,box);
+
+    let head={x:snake[0].x,y:snake[0].y};
+    if(dir=="UP") head.y-=box;
+    if(dir=="DOWN") head.y+=box;
+    if(dir=="LEFT") head.x-=box;
+    if(dir=="RIGHT") head.x+=box;
+
+    if(head.x==food.x && head.y==food.y){
+        food=randomFood();
+    }else{
+        snake.pop();
+    }
+
+    if(head.x<0||head.y<0||head.x>=400||head.y>=400||hit(head)){
+        alert("Game Over");
+        startSnake();
+        return;
+    }
+
+    snake.unshift(head);
+}
+
+function hit(h){
+    return snake.some(s=>s.x==h.x&&s.y==h.y);
+}
+
+function randomFood(){
+    return{
+        x:Math.floor(Math.random()*20)*box,
+        y:Math.floor(Math.random()*20)*box
+    };
+}
+
+// ===== Click Speed Game =====
+let score=0, circle;
+
+function startClick(){
+    hideAll();
+    score=0;
+    document.getElementById("score").innerText="Score: 0";
+    document.getElementById("clickGame").style.display="block";
+    spawn();
+}
+
+function spawn(){
+    if(circle) circle.remove();
+    circle=document.createElement("div");
+    circle.className="circle";
+    circle.style.left=Math.random()*300+"px";
+    circle.style.top=Math.random()*300+100+"px";
+    circle.onclick=()=>{
+        score++;
+        document.getElementById("score").innerText="Score: "+score;
+        spawn();
+    };
+    document.body.appendChild(circle);
+}
+
+function hideAll(){
+    canvas.style.display="none";
+    document.getElementById("clickGame").style.display="none";
+    if(circle) circle.remove();
+}
+</script>
+
+</body>
+</html>
